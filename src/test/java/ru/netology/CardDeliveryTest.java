@@ -1,5 +1,7 @@
 package ru.netology;
 
+import com.codeborne.selenide.Condition;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.time.Duration;
@@ -7,298 +9,277 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
 import static com.codeborne.selenide.Condition.exactText;
-import static com.codeborne.selenide.Condition.visible;
-import static com.codeborne.selenide.Selectors.withText;
 import static com.codeborne.selenide.Selenide.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class CardDeliveryTest {
+
+    private String generateDate(int count) {
+        String planningDate;
+        planningDate = DateTimeFormatter.ofPattern("dd.MM.yyyy").format(LocalDate.now().plusDays(count));
+        return planningDate;
+    }
+
+    @BeforeEach
+    void createUrl() {
+        open("http://localhost:9999/");
+    }
+
     @Test
     void happyPathTest() {
-        open("http://localhost:9999/");
+        String planningDate = generateDate(7);
 
         $("[data-test-id='city'] input").setValue("Москва");
-        String date = DateTimeFormatter.ofPattern("dd.MM.yyyy").format(LocalDate.now().plusDays(7));
         $("[data-test-id='date'] input").doubleClick();
-        $("[data-test-id='date'] input").sendKeys(date);
+        $("[data-test-id='date'] input").sendKeys(planningDate);
         $("[data-test-id='name'] input").setValue("Петров Олег");
         $("[data-test-id='phone'] input").setValue("+79009009898");
         $("[data-test-id='agreement']").click();
         $$("button").find(exactText("Забронировать")).click();
 
-        $(withText("Успешно!")).shouldBe(visible, Duration.ofSeconds(15));
+        //$(withText("Успешно!")).shouldHave(visible, Duration.ofSeconds(15));
+        $(".notification__content")
+                .shouldHave(Condition.text("Встреча успешно забронирована на " + planningDate), Duration.ofSeconds(15))
+                .shouldBe(Condition.visible);
     }
 
     @Test
     void wrongСityTest() {
-        open("http://localhost:9999/");
+        String planningDate = generateDate(7);
 
         $("[data-test-id='city'] input").setValue("Тара");
-        String date = DateTimeFormatter.ofPattern("dd.MM.yyyy").format(LocalDate.now().plusDays(7));
         $("[data-test-id='date'] input").doubleClick();
-        $("[data-test-id='date'] input").sendKeys(date);
+        $("[data-test-id='date'] input").sendKeys(planningDate);
         $("[data-test-id='name'] input").setValue("Петров Олег");
         $("[data-test-id='phone'] input").setValue("+79009009898");
         $("[data-test-id='agreement']").click();
         $$("button").find(exactText("Забронировать")).click();
 
-        String actual = $("[data-test-id='city'] .input__sub").getText();
-        assertEquals("Доставка в выбранный город недоступна", actual);
+        $("[data-test-id='city'] .input__sub").shouldHave(Condition.exactText("Доставка в выбранный город недоступна"));
     }
 
     @Test
     void engСityTest() {
-        open("http://localhost:9999/");
+        String planningDate = generateDate(7);
 
         $("[data-test-id='city'] input").setValue("Moskva");
-        String date = DateTimeFormatter.ofPattern("dd.MM.yyyy").format(LocalDate.now().plusDays(7));
         $("[data-test-id='date'] input").doubleClick();
-        $("[data-test-id='date'] input").sendKeys(date);
+        $("[data-test-id='date'] input").sendKeys(planningDate);
         $("[data-test-id='name'] input").setValue("Петров Олег");
         $("[data-test-id='phone'] input").setValue("+79009009898");
         $("[data-test-id='agreement']").click();
         $$("button").find(exactText("Забронировать")).click();
 
-        String actual = $("[data-test-id='city'] .input__sub").getText();
-        assertEquals("Доставка в выбранный город недоступна", actual);
+        $("[data-test-id='city'] .input__sub").shouldHave(Condition.exactText("Доставка в выбранный город недоступна"));
     }
 
     @Test
     void specialCharacterСityTest() {
-        open("http://localhost:9999/");
+        String planningDate = generateDate(7);
 
         $("[data-test-id='city'] input").setValue("%%%%66^^");
-        String date = DateTimeFormatter.ofPattern("dd.MM.yyyy").format(LocalDate.now().plusDays(7));
         $("[data-test-id='date'] input").doubleClick();
-        $("[data-test-id='date'] input").sendKeys(date);
+        $("[data-test-id='date'] input").sendKeys(planningDate);
         $("[data-test-id='name'] input").setValue("Петров Олег");
         $("[data-test-id='phone'] input").setValue("+79009009898");
         $("[data-test-id='agreement']").click();
         $$("button").find(exactText("Забронировать")).click();
 
-        String actual = $("[data-test-id='city'] .input__sub").getText();
-        assertEquals("Доставка в выбранный город недоступна", actual);
+        $("[data-test-id='city'] .input__sub").shouldHave(Condition.exactText("Доставка в выбранный город недоступна"));
     }
 
     @Test
     void numberСityTest() {
-        open("http://localhost:9999/");
+        String planningDate = generateDate(7);
 
         $("[data-test-id='city'] input").setValue("123");
-        String date = DateTimeFormatter.ofPattern("dd.MM.yyyy").format(LocalDate.now().plusDays(7));
         $("[data-test-id='date'] input").doubleClick();
-        $("[data-test-id='date'] input").sendKeys(date);
+        $("[data-test-id='date'] input").sendKeys(planningDate);
         $("[data-test-id='name'] input").setValue("Петров Олег");
         $("[data-test-id='phone'] input").setValue("+79009009898");
         $("[data-test-id='agreement']").click();
         $$("button").find(exactText("Забронировать")).click();
 
-        String actual = $("[data-test-id='city'] .input__sub").getText();
-        assertEquals("Доставка в выбранный город недоступна", actual);
+        $("[data-test-id='city'] .input__sub").shouldHave(Condition.exactText("Доставка в выбранный город недоступна"));
     }
 
     @Test
     void notСityTest() {
-        open("http://localhost:9999/");
+        String planningDate = generateDate(7);
 
         $("[data-test-id='city'] input").setValue("");
-        String date = DateTimeFormatter.ofPattern("dd.MM.yyyy").format(LocalDate.now().plusDays(7));
         $("[data-test-id='date'] input").doubleClick();
-        $("[data-test-id='date'] input").sendKeys(date);
+        $("[data-test-id='date'] input").sendKeys(planningDate);
         $("[data-test-id='name'] input").setValue("Петров Олег");
         $("[data-test-id='phone'] input").setValue("+79009009898");
         $("[data-test-id='agreement']").click();
         $$("button").find(exactText("Забронировать")).click();
 
-        String actual = $("[data-test-id='city'] .input__sub").getText();
-        assertEquals("Поле обязательно для заполнения", actual);
+        $("[data-test-id='city'] .input__sub").shouldHave(Condition.exactText("Поле обязательно для заполнения"));
     }
 
     @Test
     void wrongDateTest() {
-        open("http://localhost:9999/");
+        String planningDate = generateDate(2);
 
         $("[data-test-id='city'] input").setValue("Москва");
-        String newDate = DateTimeFormatter.ofPattern("dd.MM.yyyy").format(LocalDate.now().plusDays(2));
         $("[data-test-id='date'] input").doubleClick();
-        $("[data-test-id='date'] input").sendKeys(newDate);
+        $("[data-test-id='date'] input").sendKeys(planningDate);
         $("[data-test-id='name'] input").setValue("Петров Олег");
         $("[data-test-id='phone'] input").setValue("+79009009898");
         $("[data-test-id='agreement']").click();
         $$("button").find(exactText("Забронировать")).click();
 
-        String actual = $("[data-test-id='date'] .input_invalid .input__sub").getText();
-        assertEquals("Заказ на выбранную дату невозможен", actual);
+        $("[data-test-id='date'] .input_invalid .input__sub").shouldHave(Condition.exactText("Заказ на выбранную дату невозможен"));
     }
 
     @Test
     void engNameTest() {
-        open("http://localhost:9999/");
+        String planningDate = generateDate(3);
 
         $("[data-test-id='city'] input").setValue("Москва");
-        String newDate = DateTimeFormatter.ofPattern("dd.MM.yyyy").format(LocalDate.now().plusDays(3));
         $("[data-test-id='date'] input").doubleClick();
-        $("[data-test-id='date'] input").sendKeys(newDate);
+        $("[data-test-id='date'] input").sendKeys(planningDate);
         $("[data-test-id='name'] input").setValue("Petrov Oleg");
         $("[data-test-id='phone'] input").setValue("+79009009898");
         $("[data-test-id='agreement']").click();
         $$("button").find(exactText("Забронировать")).click();
 
-        String actual = $("[data-test-id='name'] .input__sub").getText();
-        assertEquals("Имя и Фамилия указаные неверно. Допустимы только русские буквы, пробелы и дефисы.", actual);
+        $("[data-test-id='name'] .input__sub").shouldHave(Condition.exactText("Имя и Фамилия указаные неверно. Допустимы только русские буквы, пробелы и дефисы."));
     }
 
     @Test
     void specialCharacterNameTest() {
-        open("http://localhost:9999/");
+        String planningDate = generateDate(3);
 
         $("[data-test-id='city'] input").setValue("Москва");
-        String newDate = DateTimeFormatter.ofPattern("dd.MM.yyyy").format(LocalDate.now().plusDays(3));
         $("[data-test-id='date'] input").doubleClick();
-        $("[data-test-id='date'] input").sendKeys(newDate);
+        $("[data-test-id='date'] input").sendKeys(planningDate);
         $("[data-test-id='name'] input").setValue("**** %%%");
         $("[data-test-id='phone'] input").setValue("+79009009898");
         $("[data-test-id='agreement']").click();
         $$("button").find(exactText("Забронировать")).click();
 
-        String actual = $("[data-test-id='name'] .input__sub").getText();
-        assertEquals("Имя и Фамилия указаные неверно. Допустимы только русские буквы, пробелы и дефисы.", actual);
+        $("[data-test-id='name'] .input__sub").shouldHave(Condition.exactText("Имя и Фамилия указаные неверно. Допустимы только русские буквы, пробелы и дефисы."));
     }
 
     @Test
     void numberNameTest() {
-        open("http://localhost:9999/");
+        String planningDate = generateDate(3);
 
         $("[data-test-id='city'] input").setValue("Москва");
-        String newDate = DateTimeFormatter.ofPattern("dd.MM.yyyy").format(LocalDate.now().plusDays(3));
         $("[data-test-id='date'] input").doubleClick();
-        $("[data-test-id='date'] input").sendKeys(newDate);
+        $("[data-test-id='date'] input").sendKeys(planningDate);
         $("[data-test-id='name'] input").setValue("123 123");
         $("[data-test-id='phone'] input").setValue("+79009009898");
         $("[data-test-id='agreement']").click();
         $$("button").find(exactText("Забронировать")).click();
 
-        String actual = $("[data-test-id='name'] .input__sub").getText();
-        assertEquals("Имя и Фамилия указаные неверно. Допустимы только русские буквы, пробелы и дефисы.", actual);
+        $("[data-test-id='name'] .input__sub").shouldHave(Condition.exactText("Имя и Фамилия указаные неверно. Допустимы только русские буквы, пробелы и дефисы."));
     }
 
     @Test
     void notNameTest() {
-        open("http://localhost:9999/");
+        String planningDate = generateDate(3);
 
         $("[data-test-id='city'] input").setValue("Москва");
-        String newDate = DateTimeFormatter.ofPattern("dd.MM.yyyy").format(LocalDate.now().plusDays(3));
         $("[data-test-id='date'] input").doubleClick();
-        $("[data-test-id='date'] input").sendKeys(newDate);
+        $("[data-test-id='date'] input").sendKeys(planningDate);
         $("[data-test-id='name'] input").setValue("");
         $("[data-test-id='phone'] input").setValue("+79009009898");
         $("[data-test-id='agreement']").click();
         $$("button").find(exactText("Забронировать")).click();
 
-        String actual = $("[data-test-id='name'] .input__sub").getText();
-        assertEquals("Поле обязательно для заполнения", actual);
+        $("[data-test-id='name'] .input__sub").shouldHave(Condition.exactText("Поле обязательно для заполнения"));
     }
 
     @Test
     void maxPhoneTest() {
-        open("http://localhost:9999/");
+        String planningDate = generateDate(3);
 
         $("[data-test-id='city'] input").setValue("Москва");
-        String newDate = DateTimeFormatter.ofPattern("dd.MM.yyyy").format(LocalDate.now().plusDays(3));
         $("[data-test-id='date'] input").doubleClick();
-        $("[data-test-id='date'] input").sendKeys(newDate);
+        $("[data-test-id='date'] input").sendKeys(planningDate);
         $("[data-test-id='name'] input").setValue("Петров Олег");
         $("[data-test-id='phone'] input").setValue("+79009009898000000000");
         $("[data-test-id='agreement']").click();
         $$("button").find(exactText("Забронировать")).click();
 
-        String actual = $("[data-test-id='phone'] .input__sub").getText();
-        assertEquals("Телефон указан неверно. Должно быть 11 цифр, например, +79012345678.", actual);
+        $("[data-test-id='phone'] .input__sub").shouldHave(Condition.exactText("Телефон указан неверно. Должно быть 11 цифр, например, +79012345678."));
     }
 
     @Test
     void minPhoneTest() {
-        open("http://localhost:9999/");
+        String planningDate = generateDate(3);
 
         $("[data-test-id='city'] input").setValue("Москва");
-        String newDate = DateTimeFormatter.ofPattern("dd.MM.yyyy").format(LocalDate.now().plusDays(3));
         $("[data-test-id='date'] input").doubleClick();
-        $("[data-test-id='date'] input").sendKeys(newDate);
+        $("[data-test-id='date'] input").sendKeys(planningDate);
         $("[data-test-id='name'] input").setValue("Петров Олег");
         $("[data-test-id='phone'] input").setValue("+79009");
         $("[data-test-id='agreement']").click();
         $$("button").find(exactText("Забронировать")).click();
 
-        String actual = $("[data-test-id='phone'] .input__sub").getText();
-        assertEquals("Телефон указан неверно. Должно быть 11 цифр, например, +79012345678.", actual);
+        $("[data-test-id='phone'] .input__sub").shouldHave(Condition.exactText("Телефон указан неверно. Должно быть 11 цифр, например, +79012345678."));
     }
 
     @Test
     void engLettersPhoneTest() {
-        open("http://localhost:9999/");
+        String planningDate = generateDate(3);
 
         $("[data-test-id='city'] input").setValue("Москва");
-        String newDate = DateTimeFormatter.ofPattern("dd.MM.yyyy").format(LocalDate.now().plusDays(3));
         $("[data-test-id='date'] input").doubleClick();
-        $("[data-test-id='date'] input").sendKeys(newDate);
+        $("[data-test-id='date'] input").sendKeys(planningDate);
         $("[data-test-id='name'] input").setValue("Петров Олег");
         $("[data-test-id='phone'] input").setValue("iiooii");
         $("[data-test-id='agreement']").click();
         $$("button").find(exactText("Забронировать")).click();
 
-        String actual = $("[data-test-id='phone'] .input__sub").getText();
-        assertEquals("Телефон указан неверно. Должно быть 11 цифр, например, +79012345678.", actual);
+        $("[data-test-id='phone'] .input__sub").shouldHave(Condition.exactText("Телефон указан неверно. Должно быть 11 цифр, например, +79012345678."));
     }
 
     @Test
     void specialCharacterPhoneTest() {
-        open("http://localhost:9999/");
+        String planningDate = generateDate(3);
 
         $("[data-test-id='city'] input").setValue("Москва");
-        String newDate = DateTimeFormatter.ofPattern("dd.MM.yyyy").format(LocalDate.now().plusDays(3));
         $("[data-test-id='date'] input").doubleClick();
-        $("[data-test-id='date'] input").sendKeys(newDate);
+        $("[data-test-id='date'] input").sendKeys(planningDate);
         $("[data-test-id='name'] input").setValue("Петров Олег");
         $("[data-test-id='phone'] input").setValue("&*(*&^");
         $("[data-test-id='agreement']").click();
         $$("button").find(exactText("Забронировать")).click();
 
-        String actual = $("[data-test-id='phone'] .input__sub").getText();
-        assertEquals("Телефон указан неверно. Должно быть 11 цифр, например, +79012345678.", actual);
+        $("[data-test-id='phone'] .input__sub").shouldHave(Condition.exactText("Телефон указан неверно. Должно быть 11 цифр, например, +79012345678."));
     }
 
     @Test
     void notPlusPhoneTest() {
-        open("http://localhost:9999/");
+        String planningDate = generateDate(3);
 
         $("[data-test-id='city'] input").setValue("Москва");
-        String newDate = DateTimeFormatter.ofPattern("dd.MM.yyyy").format(LocalDate.now().plusDays(3));
         $("[data-test-id='date'] input").doubleClick();
-        $("[data-test-id='date'] input").sendKeys(newDate);
+        $("[data-test-id='date'] input").sendKeys(planningDate);
         $("[data-test-id='name'] input").setValue("Петров Олег");
         $("[data-test-id='phone'] input").setValue("79009009898");
         $("[data-test-id='agreement']").click();
         $$("button").find(exactText("Забронировать")).click();
 
-        String actual = $("[data-test-id='phone'] .input__sub").getText();
-        assertEquals("Телефон указан неверно. Должно быть 11 цифр, например, +79012345678.", actual);
+        $("[data-test-id='phone'] .input__sub").shouldHave(Condition.exactText("Телефон указан неверно. Должно быть 11 цифр, например, +79012345678."));
     }
 
     @Test
     void notCheckboxTest() {
-        open("http://localhost:9999/");
+        String planningDate = generateDate(3);
 
         $("[data-test-id='city'] input").setValue("Москва");
-        String newDate = DateTimeFormatter.ofPattern("dd.MM.yyyy").format(LocalDate.now().plusDays(3));
         $("[data-test-id='date'] input").doubleClick();
-        $("[data-test-id='date'] input").sendKeys(newDate);
+        $("[data-test-id='date'] input").sendKeys(planningDate);
         $("[data-test-id='name'] input").setValue("Петров Олег");
         $("[data-test-id='phone'] input").setValue("+79009009898");
-
         $$("button").find(exactText("Забронировать")).click();
 
-        String actual = $("[data-test-id='agreement'] .checkbox__text").getCssValue("color");
-        assertEquals("rgba(255, 92, 92, 1)", actual);
+        $("[data-test-id=agreement]").shouldHave(Condition.cssClass("input_invalid"));
+        ;
     }
 
 
